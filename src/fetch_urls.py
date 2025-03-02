@@ -5,7 +5,7 @@ import json
 urls = [
     "https://example.com",
     "https://httpbin.org/status/404",
-    "https://nonexistent.url"
+    "https://nonexistent.url",
 ]
 
 
@@ -13,7 +13,10 @@ async def fetch_urls(urls: list[str], file_path: str) -> list[dict]:
     semaphore = asyncio.Semaphore(5)
     results = []
 
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(ssl=False)
+    ) as session:
+
         async def process_url(url):
             async with semaphore:
                 try:
@@ -24,12 +27,12 @@ async def fetch_urls(urls: list[str], file_path: str) -> list[dict]:
 
         results = await asyncio.gather(*[process_url(url) for url in urls])
 
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             for result in results:
-                f.write(json.dumps(result) + '\n')
+                f.write(json.dumps(result) + "\n")
 
         return results
 
 
-if __name__ == '__main__':
-    asyncio.run(fetch_urls(urls, './results.json'))
+if __name__ == "__main__":
+    asyncio.run(fetch_urls(urls, "./results.json"))
