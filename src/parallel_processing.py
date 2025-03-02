@@ -123,42 +123,6 @@ def run_benchmark(data_sizes):
     return results
 
 
-def display_results_table(results):
-    table_data = []
-
-    for i, size in enumerate(results["Размер данных"]):
-        row = [
-            size,
-            f"{results['Последовательная обработка'][i]:.4f}",
-            f"{results['ThreadPoolExecutor'][i]:.4f}",
-            f"{results['ProcessPool'][i]:.4f}",
-            f"{results['Process + Queue'][i]:.4f}",
-        ]
-        table_data.append(row)
-
-    headers = [
-        "Размер данных",
-        "Последовательная",
-        "ThreadPool",
-        "ProcessPool",
-        "Process+Queue",
-    ]
-    table = "\n" + "\n".join(
-        [
-            "+---------------+----------------+-------------+-------------+--------------+",
-            "| Размер данных | Последовательная | ThreadPool  | ProcessPool | Process+Queue |",
-            "+---------------+----------------+-------------+-------------+--------------+",
-        ]
-    )
-
-    for row in table_data[:-1]:
-        table += f"\n| {row[0]:<13} | {row[1]:<14} | {row[2]:<11} | {row[3]:<11} | {row[4]:<12} |"
-
-    table += "\n+---------------+----------------+-------------+-------------+--------------+"
-
-    return table, table_data, headers
-
-
 def visualize_results(results):
     data_sizes = results["Размер данных"]
 
