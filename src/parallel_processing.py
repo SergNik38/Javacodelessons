@@ -116,8 +116,7 @@ def run_benchmark(data_sizes):
         process_pool_result, process_pool_time = variant_b_process_pool(data)
         results["ProcessPool"].append(process_pool_time)
 
-        process_queue_result, process_queue_time = variant_c_process_queue(
-            data)
+        process_queue_result, process_queue_time = variant_c_process_queue(data)
         results["Process + Queue"].append(process_queue_time)
 
     return results
@@ -138,8 +137,7 @@ def visualize_results(results):
         data_sizes, results["ThreadPoolExecutor"], "s-", label="ThreadPoolExecutor"
     )
     plt.plot(data_sizes, results["ProcessPool"], "^-", label="ProcessPool")
-    plt.plot(data_sizes, results["Process + Queue"],
-             "D-", label="Process + Queue")
+    plt.plot(data_sizes, results["Process + Queue"], "D-", label="Process + Queue")
 
     plt.xlabel("Размер данных")
     plt.ylabel("Время выполнения (секунды)")
