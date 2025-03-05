@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 async def fetch_urls(
-    input_file: str, output_file: str = "result.jsonl", max_concurrent: int = 5
+    input_file: str, output_file: str, max_concurrent: int = 5
 ) -> None:
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)
 
@@ -65,8 +65,9 @@ async def fetch_urls(
 if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 2:
         sys.exit(1)
 
     input_file = sys.argv[1]
-    asyncio.run(fetch_urls(input_file))
+    output_file = sys.argv[2] if len(sys.argv) > 2 else "result.jsonl"
+    asyncio.run(fetch_urls(input_file, output_file))
