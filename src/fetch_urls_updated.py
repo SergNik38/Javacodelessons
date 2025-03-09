@@ -36,7 +36,7 @@ async def fetch_urls(input_file: str) -> None:
         with open(output_file, "w", encoding="utf-8") as f:
             slice_size = 10
             for i in range(0, len(urls), slice_size):
-                url_slice = urls[i:i + slice_size]
+                url_slice = urls[i : i + slice_size]
                 tasks = [get_url(session, url) for url in url_slice]
                 results = await asyncio.gather(*tasks)
 
