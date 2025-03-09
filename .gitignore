@@ -6,6 +6,6 @@ __pycache__/
 dist/
 *.egg-info/ 
 .ruff_cache/
-src/example.py
+src/week_1/example.py
 results/
-src/config.py
+src/week_1/config.py
