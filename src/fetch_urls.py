@@ -9,9 +9,9 @@ urls = [
 ]
 
 
-async def fetch_urls(urls: list[str], file_path: str) -> list[dict]:
+async def fetch_urls(urls: list[str], file_path: str, slice_size: int = 100) -> list[dict]:
     semaphore = asyncio.Semaphore(5)
-    results = []
+    all_results = []
 
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(ssl=False)
@@ -25,13 +25,15 @@ async def fetch_urls(urls: list[str], file_path: str) -> list[dict]:
                 except Exception:
                     return {"url": url, "status_code": 0}
 
-        results = await asyncio.gather(*[process_url(url) for url in urls])
-
         with open(file_path, "w") as f:
-            for result in results:
-                f.write(json.dumps(result) + "\n")
+            for i in range(0, len(urls), slice_size):
+                url_slice = urls[i:i + slice_size]
+                slice_results = await asyncio.gather(*[process_url(url) for url in url_slice])
+                for result in slice_results:
+                    f.write(json.dumps(result) + "\n")
+                all_results.extend(slice_results)
 
-        return results
+        return all_results
 
 
 if __name__ == "__main__":
