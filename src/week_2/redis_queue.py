@@ -18,12 +18,12 @@ class RedisQueue:
         return json.loads(message)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     q = RedisQueue()
-    q.publish({'a': 1})
-    q.publish({'b': 2})
-    q.publish({'c': 3})
+    q.publish({"a": 1})
+    q.publish({"b": 2})
+    q.publish({"c": 3})
 
-    assert q.consume() == {'a': 1}
-    assert q.consume() == {'b': 2}
-    assert q.consume() == {'c': 3}
+    assert q.consume() == {"a": 1}
+    assert q.consume() == {"b": 2}
+    assert q.consume() == {"c": 3}
