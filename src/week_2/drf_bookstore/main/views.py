@@ -12,25 +12,27 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60 * 15))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def buy(self, request, pk=None):
         book = self.get_object()
         if book.count > 0:
             book.count -= 1
             book.save()
-            return Response({'status': 'Книга успешно куплена'})
+            return Response({"status": "Книга успешно куплена"})
         else:
-            return Response({'status': 'Книги нет в наличии'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"status": "Книги нет в наличии"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
 
-    @method_decorator(cache_page(60*15))
+    @method_decorator(cache_page(60 * 15))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
