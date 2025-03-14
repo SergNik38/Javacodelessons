@@ -3,40 +3,34 @@ from collections import OrderedDict
 
 
 def lru_cache(*args, maxsize=None):
-    if not maxsize:
-        func = args[0]
-        cache = {}
-
+    def create_wrapper(func, cache_obj, has_maxsize=False):
         def wrapper(*args, **kwargs):
             key = (args, frozenset(kwargs.items()))
-            if key in cache:
-                return cache[key]
+            if key in cache_obj:
+                if has_maxsize:
+                    cache_obj.move_to_end(key)
+                return cache_obj[key]
+
             result = func(*args, **kwargs)
-            cache[key] = result
+            cache_obj[key] = result
+
+            if has_maxsize and len(cache_obj) > maxsize:
+                cache_obj.popitem(last=False)
+
             return result
-
         return wrapper
-    else:
 
-        def decorator(func):
-            cache = OrderedDict()
+    if not maxsize:
+        if args:
+            func = args[0]
+            cache = {}
+            return create_wrapper(func, cache)
 
-            def wrapper(*args, **kwargs):
-                key = (args, frozenset(kwargs.items()))
-                if key in cache:
-                    cache.move_to_end(key)
-                    return cache[key]
-                result = func(*args, **kwargs)
-                cache[key] = result
+    def decorator(func):
+        cache = OrderedDict()
+        return create_wrapper(func, cache, has_maxsize=True)
 
-                if len(cache) > maxsize:
-                    cache.popitem(last=False)
-
-                return result
-
-            return wrapper
-
-        return decorator
+    return decorator
 
 
 @lru_cache
