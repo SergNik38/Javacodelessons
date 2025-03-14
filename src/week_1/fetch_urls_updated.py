@@ -9,12 +9,7 @@ async def fetch_urls(input_file: str) -> None:
     output_file = "result.jsonl"
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)
 
-    try:
-        with open(input_file) as f:
-            urls = [url.strip() for url in f if url.strip()]
-    except Exception as e:
-        print(f"Ошибка чтения файла {input_file}: {e}")
-        return
+    url_queue = asyncio.Queue()
 
     semaphore = asyncio.Semaphore(5)
 
@@ -29,20 +24,53 @@ async def fetch_urls(input_file: str) -> None:
                 print(f"Ошибка {url}: {e}")
             return None
 
+    async def worker():
+        while True:
+            try:
+                url = await url_queue.get()
+                result = await get_url(session, url)
+                if result:
+                    async with output_lock:
+                        with open(output_file, "a", encoding="utf-8") as f:
+                            f.write(json.dumps(result, ensure_ascii=False) + "\n")
+                url_queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                print(f"Ошибка в worker: {e}")
+                url_queue.task_done()
+
+    output_lock = asyncio.Lock()
+
+    try:
+        with open(input_file) as f:
+            for line in f:
+                url = line.strip()
+                if url:
+                    await url_queue.put(url)
+        print(f"URL-адреса загружены в очередь")
+    except Exception as e:
+        print(f"Ошибка чтения файла {input_file}: {e}")
+        return
+
+    with open(output_file, "w", encoding="utf-8"):
+        pass
+
     async with aiohttp.ClientSession(
-        connector=aiohttp.TCPConnector(ssl=False),
+        connector=aiohttp.TCPConnector(ssl=False, limit=100),
         timeout=aiohttp.ClientTimeout(total=300),
     ) as session:
-        with open(output_file, "w", encoding="utf-8") as f:
-            slice_size = 10
-            for i in range(0, len(urls), slice_size):
-                url_slice = urls[i : i + slice_size]
-                tasks = [get_url(session, url) for url in url_slice]
-                results = await asyncio.gather(*tasks)
+        worker_count = 20
+        workers = [asyncio.create_task(worker()) for _ in range(worker_count)]
 
-                for result in results:
-                    if result:
-                        f.write(json.dumps(result, ensure_ascii=False) + "\n")
+        await url_queue.join()
+
+        for w in workers:
+            w.cancel()
+
+        await asyncio.gather(*workers, return_exceptions=True)
+
+    print("Обработка завершена")
 
 
 def main():

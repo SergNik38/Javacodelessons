@@ -18,6 +18,7 @@ def lru_cache(*args, maxsize=None):
                 cache_obj.popitem(last=False)
 
             return result
+
         return wrapper
 
     if not maxsize:
